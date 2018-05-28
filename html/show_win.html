@@ -1,0 +1,125 @@
+﻿<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>购物车</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+		<style type="text/css">           
+		body {
+	        background-color: #FFFFFF;
+         }
+         img{
+         border:none;
+         } 
+
+.center {
+  position: fixed;
+  left:25%;
+  width:50%;
+  height:39px;
+  line-height: 39px;
+  margin-left: auto; 
+  margin-right: auto; 
+  margin-top:4px;
+  color: #6D6D72;
+}
+        
+.aui-icon-left:before{
+       font-size: 25px;
+     line-height: 45px;
+} 
+.aui-icon-search:before{
+       font-size: 25px;
+     line-height: 45px;
+} 
+		</style>
+	</head>
+	<body>
+
+<header class="aui-bar aui-bar-nav aui-bar-danger" id="aui-header">
+    <div class="topToolbar">
+    <div class="aui-iconfont aui-icon-left aui-pull-left" tapmode onclick="closeWin()">　　</div>
+    
+
+    <div class="center">
+    <input type="search" placeholder="输入搜索内容" id="search-input" style="height: 37px">
+    </div>
+
+    
+    <div class="aui-iconfont aui-icon-search aui-pull-right" tapmode onclick="show()"> </div>
+    </div>
+</header>  
+
+ 
+</body>
+<script type="text/javascript" src="../script/api.js" ></script>
+
+
+<script type="text/javascript">
+apiready = function(){
+    api.parseTapmode();//加速tapmode解析
+    openFrame();//打开产品搜索内页
+}
+
+//打开产品搜索内页
+function openFrame(){
+        api.openFrame({
+        name: 'show_frm',
+        url: '../html/show_frm.html',
+        rect: {
+            x: 0,
+            y: 45,
+            w: 'auto',
+            h: api.winHeight-45
+        },
+        bounces: false,
+        bgColor: 'rgba(0,0,0,0)',
+        vScrollBarEnabled: true,
+        hScrollBarEnabled: true
+        });
+}
+
+
+//关闭Win页面
+function closeWin(){
+ api.closeWin({});
+}
+
+
+//监控enter按键函数
+document.onkeydown=keyDownSearch;      
+function keyDownSearch(e) {    
+        // 兼容FF和IE和Opera    
+        var theEvent = e || window.event;    
+        var code = theEvent.keyCode || theEvent.which || theEvent.charCode;    
+        if (code == 13) {    
+            //alert('回车');//具体处理函数  
+            show();//提交搜索  
+            return false;    
+        }    
+        return true;    
+} 
+
+
+//搜索函数
+function show(){      
+   var txt=document.getElementById("search-input").value;
+   if(!(/^[\u4E00-\u9FA5\uf900-\ufa2d\w\.\s]{1,10}$/.test(txt))){  
+     api.toast({msg:'必须输入1-10位字符才能搜索！'}); 
+     document.getElementById('search-input').focus(); //获取焦点
+     return false;
+    }
+     //======将搜索产品发布出去 开始===========================
+    api.sendEvent({
+    name: 'js_sousuo',
+    extra: {txt: txt}
+    });
+    //======将搜索产品发布出去 结束=========================== 
+}
+
+
+</script>
+</html>

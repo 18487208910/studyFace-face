@@ -1,0 +1,123 @@
+﻿<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>TT生鲜</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+		<style type="text/css">
+		 body {
+	        background-color: #FFFFFF;
+         }
+		</style>
+	</head>
+	<body>
+	
+
+<div class="aui-content">
+<ul class="aui-list-view" style="img{border: none}" id="caipin_lb">
+
+             
+</ul>
+</div>
+
+<div class="aui-content aui-text-center">
+<f id="no">支持模糊搜索，<br/>例如输入“计”可以搜到计算机、会计等。</f>
+</div>
+
+</body>
+
+
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="../script/jquery.lazyload.js"></script>
+<script type="text/javascript">
+
+//页面启动参数
+apiready = function() {
+    api.parseTapmode();//加速tapmode解析
+    //==========接收搜索产品广播事件 开始======================   
+    api.addEventListener({
+      name: 'js_sousuo'
+    }, function(ret, err){
+      //alert(JSON.stringify(ret.value));
+      sousuo(ret.value.txt);
+    });  
+    //==========接收搜索产品广播事件 结束====================== 
+    
+  //=========监控用户向右轻扫事件============
+  api.addEventListener({
+    name:'swiperight'
+  },function(ret,err){
+    closeWin();//关闭窗体 
+  });    
+}
+
+
+//关闭Win页面
+function closeWin(){
+ api.closeWin({name: 'show_win'});
+ api.closeFrame({name: 'show_frm'});
+}
+
+
+//模糊搜索
+function sousuo(txt) { 
+var html_temp="";
+ //查询数据库 ------------开始----------------
+    var db = api.require('db');
+    var sql_y = "SELECT * FROM tiku where timu like '%"+txt+"%' or xxa like '%"+txt+"%'  or xxb like '%"+txt+"%' or xxc like '%"+txt+"%' or xxd like '%"+txt+"%'";
+    //api.alert({msg:sql_y});
+        db.selectSql({
+        name:'main',
+        sql: sql_y
+    }, function(ret, err){
+      if(ret.status){  
+     //数据库有数据，开始读取
+       if(ret.data.length>0){
+          for (var i=0;i<ret.data.length;i++)//开始循环输出
+              {
+               //转义html代码 "&lt;" : "<",  "&gt;" : ">",
+               var id=ret.data[i].id; 
+               var timu=ret.data[i].timu;
+                   timu=timu.replace(/\</g,"&lt;");
+                   timu=timu.replace(/\>/g,"&gt;"); 
+               html_temp+="            <li class=\"aui-list-view-cell aui-img\" onclick=\"openid("+id+")\">";
+               html_temp+="                <div class=\"aui-img-body\">";
+               html_temp+="                    <span>"+i+"、"+timu+"</span>";
+               html_temp+="                    <p>　</p>";
+               html_temp+="                </div>";
+               html_temp+="            </li>";
+              }//结束循环
+          document.getElementById("no").innerHTML="";//找到了就屏蔽提示语  
+          document.getElementById("caipin_lb").innerHTML=html_temp;//输出菜品列表  
+        }else{//数据库有数据 
+          document.getElementById("caipin_lb").innerHTML="";//清空结果 
+          document.getElementById("no").innerHTML="<br/>抱歉，找不到这个关键字！"; 
+        } 
+
+      }else{
+       api.toast({msg:'数据库出现问题，请重新初始化数据库！'}); 
+      }
+    });
+    //查询数据库  --------------结束-------------- 
+}
+
+
+
+
+//点击某个题目
+function openid(id){
+ //======将购物车刷新发布出去 开始===========================
+    api.sendEvent({
+    name: 'openid',
+    extra: {
+        id: id
+     }
+    });
+ //======将购物车刷新发布出去 结束=========================== 
+}
+</script>
+</html>

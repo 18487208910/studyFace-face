@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+        <meta charset="utf-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+        <title>title</title>
+        <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+        <link rel="stylesheet" type="text/css" href="../css/news-text.css" />
+        <style>
+            body {
+                background-color: #FFFFFF;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="wrap">
+<!--             <div id="main">
+        
+            
+                <h1>title</h1>
+                <label>
+                  
+                        from
+                    
+                    <em>date</em>
+                </label>
+                <div id="summary">
+                    summary
+                </div>
+                <div>
+                            
+                    <ul class="aui-list-view aui-grid-view">
+                        <li class="aui-list-view-cell aui-img aui-col-xs-4">
+                            <img class="aui-img-object" src="../image/aui/demo3.png">
+                        </li>
+                        <li class="aui-list-view-cell aui-img aui-col-xs-4">
+                            <img class="aui-img-object" src="../image/aui/demo2.png">
+                        </li>
+                        <li class="aui-list-view-cell aui-img aui-col-xs-4">
+                            <img class="aui-img-object" src="../image/aui/demo5.png">
+                        </li>
+                    </ul>
+                    
+                    
+                </div>
+        <div id="content">1234
+            </div>
+            
+            
+        </div> -->
+        </div>
+    </body>
+    <script id="dotTemplate" type="text/template">
+    {{ for(var i =0;i<it.length;i++){ }}
+                 <div id="main">
+        
+            
+                <h1>{{=it[i].title}}</h1>
+                <label>
+                    <em>{{=it[i].date}}</em>
+                </label>
+                <div id="summary">
+                    {{=it[i].summary}}
+                </div>
+        <div id="content">
+        {{=it[i].content}}
+            </div>
+            
+            
+        </div>
+            
+    {{ } }}
+ 
+</script>
+    <script type="text/javascript" src="../script/api.js"></script>
+    <script type="text/javascript" src="../script/SHA1.js"></script>
+<script type="text/javascript" src="../script/APICloud-rest.js"></script>
+<script type="text/javascript" src="../script/doT.min.js"></script> 
+    <script type="text/javascript">
+     var list,tmp,dotFunction,rid;
+
+
+
+        
+apiready = function() {
+
+
+ 
+
+
+
+         rid=api.pageParam.id;
+       // alert(rid);
+        
+        list = $api.byId('wrap');
+
+    tmp = $api.byId('dotTemplate');
+    dotFunction = doT.template(tmp.innerHTML);
+
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err){
+       
+        fnGetData(true,rid);
+    });
+   api.refreshHeaderLoading();
+
+ 
+};
+
+
+function fnGetData(isPull,id){
+    api.showProgress({
+        style: 'default',
+        animationType: 'fade',
+        title: '努力加载中...',
+        text: '先喝杯茶...',
+        modal: true
+    });
+
+
+var query = api.require("query");
+
+query.createQuery(function(ret, err) {
+    if (ret && ret.qid) {
+        var queryId = ret.qid;
+
+        query.whereEqual({
+            qid: queryId,
+            column: "id",
+            value: rid
+        });
+
+        query.limit({
+            qid:queryId,
+            value:"20"
+        });
+
+        var model = api.require("model");
+
+        model.findAll({
+            class: "activity",
+            qid: queryId
+        }, function(ret, err){
+           fnShowData(ret);
+  
+  
+  api.hideProgress();
+  api.refreshHeaderLoadDone();
+        });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+//     var client = new Resource("A6940513740818", "10BCDC12-32D0-A57F-6617-9D2946DA07C1");
+// var Activity= client.Factory("activity");
+// Activity.query({
+//   "filter": {
+//     "where": {
+//       "sid": "5938b124dc0dda917064667b"
+//     },
+//     "skip": 0,
+//     "limit": 20
+//   }
+// },function(ret,err){
+//   //return body
+//    alert(JSON.stringify(ret));
+  
+
+//   // fnShowData(ret);
+  
+  
+//   api.hideProgress();
+//   api.refreshHeaderLoadDone();
+// })
+};
+
+function fnShowData(data_){
+        // alert(JSON.stringify(data_));
+        // var dotFunction = doT.template(tmp.innerHTML);
+     
+        list.innerHTML = dotFunction(data_);
+    
+    };
+
+
+        
+    </script>
+</html>

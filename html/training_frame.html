@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>课程中心</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+	<meta name="copyright" content="www.thundersoft.com" />
+	<link rel="stylesheet" href="../css/base.css">
+
+	<style>
+		html, body {
+			width: 100%;
+			height: 100%;
+		}
+		body{
+			background-color: #FAFAFA;
+		}
+		#main{
+			overflow: hidden;
+		}
+		#recom{
+			display: -webkit-box;
+			-webkit-box-flex:1;
+			-webkit-box-orient:horizontal;
+			-webkit-box-align:center;
+			width:100%;
+			background: url(../image/home/default_blur.png) no-repeat;
+			-webkit-background-size: 100% 100%;
+		}
+		.container{
+			display: -webkit-box;
+			-webkit-box-align:center;
+			-webkit-box-pack:center;
+			-webkit-box-orient:vertical;
+			width: 100%;
+			height: 100%;
+		}
+		.container div{
+			display: -webkit-box;
+			-webkit-box-align:center;
+			-webkit-box-pack:center;
+			width: 100%;
+		}
+		.container div:nth-child(1){
+			height: 85%;
+		}
+		.container div:nth-child(2){
+			height: 15%;
+		}
+		.container div:nth-child(2) span{
+			border-width: 4px;
+			border-radius: 4px;
+			border-style: solid;
+			border-color: #FFFFFF;
+			margin: 0 1px;
+		}
+		.currentbtn{
+			border-color: rgb(0, 184, 255) !important;
+		}
+		#courselist{
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+		}
+		#courselist section{
+			display: -webkit-box;
+			border-bottom: 1px solid #e5e5e5;
+			padding-top: 12px;
+			padding-bottom: 12px;
+			padding-left: 8px;
+			padding-right: 8px;
+			background-color: #fafafa;
+		}
+		#courselist section div:nth-child(1) img{
+			margin-right: 10px;
+			border: 1px solid #B3B3B3;
+			border-radius: 14px;
+			background: #fff;
+		}
+		#courselist section div:nth-child(2){
+			width: 100%;
+			padding-top: 7px;
+			padding-bottom: 7px;
+			-webkit-box-flex: 1;
+		}
+		.title{
+			font-weight: bold;
+			font-size: 18px;
+			color: rgb(50,50,50);;
+			text-overflow:ellipsis;
+			overflow:hidden;
+			white-space:nowrap;
+			-webkit-box-flex: 1;
+			margin-bottom: 7px;
+		}
+		.content{
+			font-size: 0.9em;
+			/*color: rgb(50, 50, 50);*/
+			color: #808080;
+			line-height: 18px;
+			word-wrap: break-word;
+			word-break: break-all;
+		}
+		.courselistActive{
+			background-color: #fff !important;
+		}
+		.nodata{
+			display: -webkit-box;
+			-webkit-box-align: center;
+			-webkit-box-pack: center;
+			background-color: #FAFAFA;
+			-webkit-box-flex: 1;
+			font-size: 14px;
+			padding-top: 40px;
+		}
+		.loadmore {height: 40px; line-height: 40px; text-align: center; font-size: 14px;border-top: 1px solid #e0e0e0;display: none;}
+	
+	</style>
+</head>
+<body>
+	<div id="main">
+		
+		<div id="courselist">
+			<!-- <section tapmode="courselistActive" onclick="courseDetail(1)">
+			<div><img src="../image/default.png" width="75px" height="75px"/></div>
+			<div>
+			<label class="title">海天考研</label>
+			<label class="content">xxxx教学楼，高等数学，金牌讲师</label>
+			</div>
+			</section> -->
+
+			</div>
+		
+	</div>
+</body>
+<script src="../script/api.js"></script>
+<script src="../script/carousel.js"></script>
+<script src="../script/common.js"></script>
+<script>
+	var html ='';
+	var obj = $api.byId('courselist');
+	apiready = function() {
+		
+        
+        fnGetData();
+  
+		
+};
+
+	
+	function fnGetData(){
+		var model = api.require('model');
+		var query = api.require("query");
+
+    model.config({
+    appKey: '10BCDC12-32D0-A57F-6617-9D2946DA07C1',
+    host: 'https://d.apicloud.com'
+    });
+		
+    query.createQuery(function(ret, err) {
+    if (ret && ret.qid) {
+        var queryId = ret.qid;
+
+        query.whereEqual({
+            qid: queryId,
+            column: "",
+            value: ""
+        });
+
+        query.limit({
+            qid:queryId,
+            value:"20"
+        });
+
+        var model = api.require("model");
+
+        model.findAll({
+            class: "classCenter",
+            qid: queryId
+        }, function(ret, err){
+            // alert("ret: " + JSON.stringify(ret) + "\nerr: " + JSON.stringify(err));
+            fnShowData(ret);
+            api.refreshHeaderLoadDone();
+        });
+    }
+});
+	}
+
+	function fnShowData(datas){
+			for (var i = 0; i < datas.length; i++) {
+		   html+='<section tapmode="courselistActive" onclick="courseDetail(\'' + datas[i].id + '\','+datas[i].count+')">';
+			html+='<div><img src="'+datas[i].cover.url+'" width="75px" height="75px"/></div>';
+			html+='<div>';
+			html+='<label class="title">'+datas[i].title+'</label>';
+			html+='作者'+datas[i].author;
+		    html+='<label class="content">'+datas[i].date+'浏览次数:'+datas[i].count+'</label>';
+			html+='</div>';
+
+			html+='</section>';
+			}
+			$api.html(obj, html);
+	}
+
+	function courseDetail(id,count) {
+		var y = count+1;
+var model = api.require('model');
+ model.config({
+    appKey: '10BCDC12-32D0-A57F-6617-9D2946DA07C1',
+    host: 'https://d.apicloud.com'
+    });
+model.updateById({
+    class: 'classCenter',
+    id: id,
+    value: {
+        count: y
+    }
+}, function(ret, err){
+    if( ret ){
+         // alert( JSON.stringify( ret ) ); 
+
+         api.openWin({
+		    name: 'trainingDetail',
+		    url: './trainingDetail.html',
+		    pageParam: {
+		        name: id
+		    }
+		});
+
+           
+    }else{
+         alert( JSON.stringify( err ) );
+    }
+});
+	
+
+
+
+
+
+
+
+		
+
+		
+	};
+
+</script>
+</html>

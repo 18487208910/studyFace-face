@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/common.css"/>
+    <style>
+        body{
+            
+        }
+        #left, #leftno {
+		display:-webkit-box;
+	}
+	#left img, #leftno img {
+		margin:4px 6px 4px 10px;
+		width:36px;
+		height:36px;
+		-webkit-border-radius:9px;
+	}
+	#left div {
+		/*margin-top:8px;*/
+		-webkit-box-flex:1;
+	}
+	#leftno div{
+		font-size:18px;
+		color:#fff;
+		/*margin-top:13px;*/
+		line-height: 44px;
+	}
+	#left div dt strong {
+		font-size:18px;
+		line-height:44px;
+		color:#fff;
+	}
+	#left div dd {
+		margin-top:4px;
+		line-height:13px;
+		font-size:13px;
+		color:#868686;
+		overflow:hidden;
+	}
+	.middle {
+	    -webkit-box-flex:1;
+	    width:100%;
+	    display:-webkit-box;
+	    -webkit-box-pack:center;
+	  	-webkit-box-align:center;
+	  	line-height: 44px;
+	}
+	#right {
+		width:60px;
+		display:-webkit-box;
+		background:url(../image/home/nav_msg.png) no-repeat center;
+		-webkit-background-size:27px 20px;
+		-webkit-box-pack: end;
+	}
+	#right span{
+		display: -webkit-inline-box;
+		margin-right: 8px;
+		margin-top: 4px;
+		padding: 3px;
+		background:url(../image/checkedbg.png) no-repeat center;
+		-webkit-background-size:contain;
+		font-size: 12px;
+		color: #FFFFFF;
+		font-weight: bold;
+	}
+	#rightno{
+		width:60px;
+	}
+	.rightBtnActive {
+		background:url(../image/home/nav_msg_hov.png) no-repeat center!important;
+		-webkit-background-size:27px 20px!important;
+	}
+	.hidden{
+		display: none !important;
+	}
+	.openActive{
+		color: #00b8ff !important;
+	}
+    </style>
+</head>
+<body>
+ <div id="main">
+		<header id='header'>
+			<nav id="nav" class="hidden">
+				<a id="left" tapmode="openActive" onclick="toPcenter()">
+					<img src="../image/home/default.png" id="head" />
+					<div>
+						<dt><strong id="username"></strong></dt>
+						<dd id="city"></dd>
+					</div>
+				</a>	
+				<div class="middle">
+				</div>
+				<a id="right" tapmode="rightBtnActive" onclick="fntoPmsg()">
+				</a>
+			</nav>
+			<nav id="navno">
+				<a id="leftno" tapmode="openActive" onclick="fntoPvalid()">
+					<img src="../image/home/default.png" />
+					<div tapmode="openActive">
+						注册
+					</div>
+				</a>	
+				<div class="middle">
+				</div>
+				<a id="rightno">
+				</a>
+			</nav>
+		</header>
+		<section id='content'></section>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script src="../script/common.js"></script>
+<script type="text/javascript">
+    apiready = function(){
+    	// alert(api.winName);
+       var header = $api.byId('header');
+		$api.fixIos7Bar(header);
+		var headerPos = $api.offset(header);
+		api.openFrame({
+			name: 'home_frame',
+			url: 'home_frame.html',
+			bounces: false,
+			rect: {
+				x: 0,
+				y: headerPos.h,
+				w: 'auto',
+				h: 'auto'
+			}
+		});	
+		//引导页
+		// checkGuide();	 
+    };
+
+   //check是否需要显示引导页
+    	function checkGuide(){
+		var showGuide = $api.getStorage('showGuide');
+		if (!showGuide) {
+			api.openWin(
+				{name: 'guide', 
+				 url: '../htm/guide.html', 
+				 slidBackEnabled: false
+				});
+		}
+	}
+function addEventListener(){
+		api.setStatusBarStyle({style:'dark'});
+        
+        //监听没联网的状态
+        api.addEventListener({name: 'offline'}, function(ret, err){
+			api.toast({msg: '没联网哦，请检查网络状态！', duration: 3000, location: 'middle'});
+		});
+        
+        //监听keyback键
+		api.addEventListener({name: 'keyback'}, function(ret, err){
+			api.closeWidget();
+		});
+
+//页面显示，查看地图是否关闭
+		api.addEventListener({name:'viewappear'}, function(){
+	        var openmap = $api.getStorage('openmap');
+	        if(openmap){
+		        var map = api.require('baiduMap');
+		        map.close();
+		        $api.rmStorage('openmap');
+	        }
+	    });
+		
+		api.addEventListener({name: 'resume'}, function(ret, err){
+			//从后台回到前台的时候，如果是已经登录的用户，需要再次缺省登录
+			var logined = $api.getStorage('logined');
+			if(logined){	
+				defaultLogin && defaultLogin();//默认登录
+			}
+		});
+			}
+		//检查是否已经登录
+	function checkLogin(){
+		var logined = $api.getStorage('logined');
+		if(logined){//如果已经登录
+			defaultLogin(getSysMsg, updateHeader);//默认登录
+		}else{
+			($api.byId('nav'), 'hidden');
+			($api.byId('navno'), 'hidden');
+		}
+	}
+
+	function defaultLogin(getSysMsg, updateHeader) {
+		var model = api.require('model');
+		  model.config({appId:'A6940513740818',appKey:'10BCDC12-32D0-A57F-6617-9D2946DA07C1'});
+		//告诉server登录，更新数据
+		var usr = $api.getStorage('usr');
+		account = usr.name;
+		password = usr.password;
+		var user = api.require('user');
+		user.login({
+			username: account,
+			password: password
+		}, function(ret, err) {
+
+			if (ret && ret.id) {
+				//getSysMsg();
+				//updateHeader(); 	
+				var logined = $api.getStorage('logined');
+				var usr = $api.getStorage('usr');
+				if (usr && logined) {
+					var icon = usr.icon;
+					var city = usr.caddress;
+					var head = $api.byId('head')
+					if (icon) {
+						if (head) {
+							$api.attr(head, 'src', '../image/home/default.png');
+						}
+					} else {
+						if (head) {
+							$api.attr(head, 'src', '../image/home/default.png');
+						}
+					}
+					$api.html($api.byId('username'), usr.name);
+					if (city) {
+						$api.html($api.byId('city'), city);
+					} else {
+						$api.html($api.byId('city'), '');
+					}
+					($api.byId('navno'), 'hidden');
+					($api.byId('nav'), 'hidden');
+				}
+				$api.setStorage('usr', usr);
+			} else {
+				if (ret) {
+					api.toast({
+						msg: ret.msg,
+						location: 'middle'
+					});
+				} else if (err) {
+					api.toast({
+						msg: err.msg,
+						location: 'middle'
+					});
+				} else {
+					api.toast({
+						msg: '数据错误',
+						location: 'middle'
+					});
+				}
+			}
+		});
+	}
+	//更新头部信息
+	function updateHeader(){
+		var logined = $api.getStorage('logined');
+		var usr = $api.getStorage('usr');
+		if(usr && logined){
+			
+			var head = $api.byId('head')
+			if(usr){
+			   if(head){
+				$api.attr(head,'src', '../image/home/default.png');
+				}
+			}else{
+			   if(head){
+				$api.attr(head,'src', '../image/home/default.png');
+				}
+			}
+			$api.html($api.byId('username'), usr.name);
+		hasNoClsAddIt($api.byId('navno'), 'hidden');
+			hasClsRemoveIt($api.byId('nav'), 'hidden');
+		}else{
+			hasClsRemoveIt($api.byId('navno'), 'hidden');
+			hasNoClsAddIt($api.byId('nav'), 'hidden');
+		}
+	}
+	
+	//注册
+	function fntoPvalid(){
+		api.openWin({
+			name:'validate',
+			url:'validate.html'
+		});
+	}
+//个人中心
+	function toPcenter(){
+		api.openWin({
+		    name: 'person',
+		    url: './person.html',
+		   
+		});
+	}
+</script>
+</html>

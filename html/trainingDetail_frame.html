@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <style>
+    	body{
+    		
+    	}
+    </style>
+</head>
+<body>
+
+	
+	
+	<ul class="aui-list-view" id="list">
+		<!-- 
+		<li class="aui-list-view-cell" onclick="openviedo()">
+			单行列表标题效果
+		</li>
+		<li class="aui-list-view-cell">
+			单行列表标题效果
+		</li>
+		<li class="aui-list-view-cell">
+			单行列表标题效果
+		</li>
+		<li class="aui-list-view-cell">
+			单行列表标题效果
+		</li> -->
+	</ul>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+var html='';
+		var obj = $api.byId('list');
+	apiready = function(){
+
+		// alert(api.pageParam.id.name);
+		fnInitList(api.pageParam.id.name);
+
+	};
+
+function fnInitList(id){
+		var relation = api.require('relation');
+		
+		relation.findAll({
+		    class: 'classCenter',
+		    id: id,
+		    column: 'classlist'
+		}, function (ret, err) {
+		    if( ret ){
+		        //  alert( JSON.stringify( ret) );
+		        // alert(ret[0].content.url);
+		        fnShowData(ret);
+		    }else{
+		        alert( JSON.stringify( err) );
+		    }
+});
+}
+
+function fnShowData(datas){
+for (var i = 0; i < datas.length; i++) {
+		  
+			html+='<li class="aui-list-view-cell" onclick="openviedo(\'' + datas[i].content.url+ '\',\'' + datas[i].content.name + '\')">';
+			html+=''+datas[i].num+'.'+datas[i].title+'';
+		    html+='</li>';
+			}
+			$api.html(obj, html);
+};
+function openviedo(url,title){
+	 var videoPlayer = api.require('videoPlayer');
+        videoPlayer.play({
+            texts: {
+                head: {
+                    title: title
+                }
+            },
+            styles: {
+                head: { 
+                    bg: 'rgba(0.5,0.5,0.5,0.7)', 
+                    height: 44,
+                    titleSize: 16,
+                    titleColor: '#fff',
+                    backSize: 20,
+                    backImg: 'widget://image/back.png', 
+                    setSize: 20,
+                    setImg: 'widget://image/set.png' 
+                },
+                
+            },
+            path: url,
+            autoPlay:true
+        },function(ret, err) {
+//           alert(JSON.stringify(ret));
+//             if (ret) {
+// //            alert(JSON.stringify(ret));
+//         y=xx+1;
+//         var model = api.require('model');
+//     model.updateById({
+//     class: 'video',
+//     id: id,
+//     value: {
+//         count: y
+//     }
+// }, function(ret, err){
+//     if( ret ){
+// //       alert( JSON.stringify( ret ) );   
+//     }else{
+//          alert( JSON.stringify( err ) );
+//     }
+// });
+
+//             } else {
+// //              alert(JSON.stringify(err));
+//             }
+        });
+    }
+
+
+
+	
+</script>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <title>APP</title>
+    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+</head>
+<style>
+        body {
+            background-color: #FFFFFF;
+         }
+img.avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+}
+.boxCont{
+    position:relative;
+}
+.aui-icon-close:before{
+       font-size: 25px;
+     line-height: 45px;
+} 
+.aui-icon-search:before{
+      font-size: 25px;
+    line-height: 45px;
+} 
+</style>
+<body>
+
+<header class="aui-bar aui-bar-nav aui-bar-danger" id="aui-header">
+    <div class="topToolbar">
+    <div class="aui-iconfont aui-icon-close aui-pull-left" tapmode onclick="api.closeWin();">　　</div>
+    <div class="aui-title">随机模拟试题</div>
+    <div class="aui-iconfont aui-icon-search aui-pull-right" tapmode onclick="show()"> </div>
+    </div>
+</header>
+
+
+<div class="aui-content">
+    <ul class="aui-list-view">
+    
+       <li class="aui-list-view-cell aui-img">
+             <p>　</p>
+             
+        </li>
+          
+             
+        <li class="aui-list-view-cell aui-img">
+            <div class="aui-img-body">
+                <span id="timu"></span>
+                <p>　</p>
+            </div>
+        </li>
+
+        <li class="aui-user-view-cell aui-img" tapmode onclick="xuanzhe(1)">
+            <div class="aui-img-body">
+                <span id="xxa"></span>
+            </div>
+        </li>
+        
+        <li class="aui-user-view-cell aui-img" tapmode onclick="xuanzhe(2)">
+            <div class="aui-img-body">
+                <span id="xxb"></span>
+            </div>
+        </li>
+        
+        <li class="aui-user-view-cell aui-img" tapmode onclick="xuanzhe(3)">
+            <div class="aui-img-body">
+                <span id="xxc"></span>
+            </div>
+        </li>
+        
+        <li class="aui-user-view-cell aui-img" tapmode onclick="xuanzhe(4)">
+            <div class="aui-img-body">
+                <span id="xxd"></span>
+            </div>
+        </li>
+        
+    </ul>
+   <input type="hidden" name="zqda" id="zqda" value="0"/>
+</div>
+
+
+
+
+
+
+<footer class="aui-nav" id="aui-footer">
+     <div class="aui-content aui-text-center">
+            <div class="aui-btn aui-btn-success" tapmode onclick="up_show()">上一题</div>　　　　
+            <div class="aui-btn aui-btn-warning" tapmode onclick="dn_show()">下一题</div>
+     </div>
+</footer>
+
+</body>
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+
+
+
+var tt_db_url="test.db";//定义数据库路径
+
+        
+apiready = function(){
+    api.parseTapmode();//加速tapmode解析        
+    
+    api.setKeepScreenOn({ keepOn: true });//禁止禁止屏幕休眠        
+    shujuku();//初始化本地数据库 
+    var id=parseInt($api.getStorage("id"));//当前题目的ID
+      if(id==undefined || id==""){
+        var id=1;
+      }
+}
+//本地SQLite数据库初始化
+function shujuku() {
+  var obj = api.require('fs');
+  obj.exist({
+    path: "fs://"+tt_db_url
+   },function(ret,err){
+    if(ret.exist){
+        if(ret.directory){
+            api.alert({msg:'重要文件丢失，请重新安装APP！'});            
+            return false;
+        }else{
+            //api.alert({msg:'数据库文件已存在！'});
+            open_shujuku(0);//打开数据库
+            return false;
+        }
+           // return false;
+    }else{
+        //api.alert({msg:'数据库文件不存在！'});
+        $api.setStorage("id",1);//初始化ID
+        //用FS方法把数据库拷贝到fs路径下----开始-----------
+        var fs = api.require('fs');
+        fs.copyTo({
+        oldPath: 'widget://res/'+tt_db_url,
+        newPath: 'fs://'
+        },function(ret,err){
+        var status = ret.status;
+        if (status) {
+        //api.alert({msg:'本地数据库初始化成功！'});
+        open_shujuku(1);//打开数据库                
+        }else {
+         api.alert({msg:'初始化失败,请重新启动APP！'});
+        }
+        }); 
+        //用FS方法把数据库拷贝到fs路径下----结束-----------        
+    }
+   });
+ 
+}
+
+
+//打开本地SQLite数据库（没有用也先打开一下，为其它窗体使用做准备）
+function open_shujuku(id) {
+  //id=1标识第一次打开APP。  id=0表示再次打开APP
+  if(id==0){
+    var sid=$api.getStorage("id");
+  }else{
+    var sid=id;
+  }
+  if(sid==undefined || sid==""){
+     var sid=1;
+   }
+   //打开数据库
+   var db = api.require('db');
+   db.openDatabase({
+    name: 'main',
+    path:'fs://'+tt_db_url
+    }, function(ret, err){
+    if(ret.status){
+       //api.alert({msg:'本地数据库打开成功！'});
+       show_gwc(sid);//刷新页面         
+     }else{
+        api.alert({msg:'数据库打开失败：'+err.msg});
+     }
+    });    
+}
+ 
+//打开产品搜索页面
+function show(){
+        api.openWin({
+        name: 'show_win',
+        url: '../html/show_win.html',
+        rect: {
+            x: 0,
+            y: 0,
+            w: 'auto',
+            h: 'auto'
+        },
+        bounces: false,
+        bgColor: 'rgba(0,0,0,0)',
+        vScrollBarEnabled: true,
+        hScrollBarEnabled: true
+        });
+}
+
+
+
+//打开内容
+function show_gwc(id){
+    $api.setStorage("id",id);
+   
+document.getElementById("xxa").style.color="";
+document.getElementById("xxb").style.color="";
+document.getElementById("xxc").style.color="";
+document.getElementById("xxd").style.color="";
+ //查询数据库 ------------开始----------------
+    var db = api.require('db');
+    var sql_y = 'SELECT * FROM tiku where id='+id;
+    //api.alert({msg:sql_y});
+        db.selectSql({
+        name:'main',
+        sql: sql_y
+    }, function(ret, err){
+      if(ret.status){  
+     //数据库有数据，开始读取
+       if(ret.data.length>0){
+         //转义html代码 "&lt;" : "<",  "&gt;" : ">", 
+          var timu=ret.data[0].timu;
+              timu=timu.replace(/\</g,"&lt;");
+              timu=timu.replace(/\>/g,"&gt;");
+          var xxa=ret.data[0].xxa;
+              xxa=xxa.replace(/\</g,"&lt;");
+              xxa=xxa.replace(/\>/g,"&gt;");
+          var xxb=ret.data[0].xxb;
+              xxb=xxb.replace(/\</g,"&lt;");
+              xxb=xxb.replace(/\>/g,"&gt;");
+          var xxc=ret.data[0].xxc;
+              xxc=xxc.replace(/\</g,"&lt;");
+              xxc=xxc.replace(/\>/g,"&gt;");
+          var xxd=ret.data[0].xxd;
+              xxd=xxd.replace(/\</g,"&lt;");
+              xxd=xxd.replace(/\>/g,"&gt;");
+          document.getElementById("timu").innerHTML=ret.data[0].id+"、"+timu;
+          document.getElementById("xxa").innerHTML=xxa;
+          document.getElementById("xxb").innerHTML=xxb;
+          document.getElementById("xxc").innerHTML=xxc;
+          document.getElementById("xxd").innerHTML=xxd;
+          document.getElementById("zqda").value=ret.data[0].daan;
+          
+        }//数据库有数据  
+
+      }else{
+       api.toast({msg:'数据库出现问题，请重新初始化数据库！'}); 
+      }
+    });
+    //查询数据库  --------------结束--------------    
+}
+
+
+
+
+//上一题
+function up_show(){
+var id=parseInt($api.getStorage("id"));//当前题目的ID
+    id=id-1;
+  if(id<1){
+    api.toast({msg:'没有更多，已经是最后一题了！'});
+  }else{
+    show_gwc(id);
+  }
+}
+
+
+
+//下一题
+function dn_show(){
+var id=parseInt($api.getStorage("id"));//当前题目的ID
+    id=id+1;
+  if(id>597){
+    api.toast({msg:'没有更多，已经是最后一题了！'});
+  }else{
+    show_gwc(id);
+  }
+}
+
+
+
+//选择答案
+function xuanzhe(id){
+  var zqda=document.getElementById("zqda").value;
+      zqda=zqda.toLowerCase();
+  var czid="";
+  if(id==1){
+    id="a";  
+    czid="xxa";
+  }else if(id==2){
+    id="b";
+    czid="xxb";
+  }else if(id==3){
+    id="c";
+    czid="xxc";
+  }else if(id==4){
+    id="d";
+    czid="xxd";
+  }
+  if(id==zqda){
+     document.getElementById(czid).style.color="#2db773";
+  }else{
+     document.getElementById(czid).style.color="#e74c3c";
+     document.getElementById("xx"+zqda).style.color="#2db773";
+  }
+}
+</script>
+</html>

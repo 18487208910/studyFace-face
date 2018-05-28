@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>launch</title>
+		<link href="../css/main.css" type="text/css" rel="stylesheet" />
+		<style>
+			/*    版权样式*/
+			.loadding-btn3 {
+				position: fixed;
+				z-index: 2;
+				bottom: 2em;
+				width: 100%;
+				left: 0;
+				text-align: center
+			}
+		</style>
+	</head>
+	<body class="white-bg">
+		<div class="logo-main">
+			<i class="icon-logo"></i>
+			<font style="font-size: 20px;color: black;"><strong></strong></font>
+		</div>
+		<div class="loadding-btn">
+			<a onclick="api.closeWin();" style="text-decoration: none"><font>程序员正在加班开发中！</font></a>
+		</div>
+		<font class="loadding-btn3">Copyright &copy;考研面对面<span id="year"></span></font>
+		<div class="loading-bg"></div>
+	</body>
+<script type="text/javascript" src="api.js"></script>
+<script type="text/javascript">
+    apiready = function(){
+        
+    };
+</script>
+</html>
